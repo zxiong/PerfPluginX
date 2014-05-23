@@ -123,6 +123,14 @@ public class NmonMonitor extends ResourceMonitor {
 
     }
 
+    /**
+     *
+     * @param host
+     * @param name
+     * @param password
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     private void startMonitoring(String host, String name, String password) throws IOException, ClassNotFoundException {
         SSHClient client = new SSHClient();
         client.addHostKeyVerifier(new PromiscuousVerifier());
@@ -191,6 +199,16 @@ public class NmonMonitor extends ResourceMonitor {
         }
     }
 
+    /**
+     * stop monitor
+     *
+     * @param host
+     * @param name
+     * @param password
+     * @param build
+     * @return
+     * @throws IOException
+     */
     private String stopMonitoring(String host, String name, String password, AbstractBuild build) throws IOException {
         SSHClient client = new SSHClient();
         client.addHostKeyVerifier(new PromiscuousVerifier());
@@ -265,23 +283,23 @@ public class NmonMonitor extends ResourceMonitor {
 //        args2[2] = "--nosummary";
 
         Map avgData = new HashMap();
-//        try {
-//            String nmonDir = build.getRootDir().getAbsolutePath() + "/performance-reports/monitoring/";
-//            nmonFile = nmonDir + nmonFile.substring(nmonFile.lastIndexOf('/')+1);
-//            System.err.println("---nmonFile---" + nmonFile);
-//            com.ibm.nmon.NmonReportGenerator nrg = new com.ibm.nmon.NmonReportGenerator(
-//                    nmonFile);
-//            System.out.println(nrg.getDataSets());
-//            String host = nrg.getDataSets().iterator().next().getHostname();
-//            File hostPath = new File(nmonDir + host);
-//            if (!hostPath.exists()) {
-//                hostPath.mkdir();
-//            }
-//            nrg.createCharts(hostPath.getAbsolutePath() + "/");
-//            avgData.putAll(nrg.getAverage());
-//        } catch (Exception e) {
-//            Logger.getLogger(PerformanceReportMap.class.getName()).log(Level.SEVERE, null, e);
-//        }
+        try {
+            String nmonDir = build.getRootDir().getAbsolutePath() + "/performance-reports/monitoring/";
+            nmonFile = nmonDir + nmonFile.substring(nmonFile.lastIndexOf('/')+1);
+            System.err.println("---nmonFile---" + nmonFile);
+            com.ibm.nmon.NmonReportGenerator nrg = new com.ibm.nmon.NmonReportGenerator(
+                    nmonFile);
+            System.out.println(nrg.getDataSets());
+            String host = nrg.getDataSets().iterator().next().getHostname();
+            File hostPath = new File(nmonDir + host);
+            if (!hostPath.exists()) {
+                hostPath.mkdir();
+            }
+            nrg.createCharts(hostPath.getAbsolutePath() + "/");
+            avgData.putAll(nrg.getAverage());
+        } catch (Exception e) {
+            Logger.getLogger(PerformanceReportMap.class.getName()).log(Level.SEVERE, null, e);
+        }
 
 //        File rootpath = build.getRootDir();
 //        File monitoringDir = new File(rootpath.getAbsoluteFile() + "/performance-reports/monitoring");
@@ -304,29 +322,29 @@ public class NmonMonitor extends ResourceMonitor {
 
 
 
-        String path = build.getRootDir().getAbsolutePath() + "/performance-reports/monitoring";
-        try {
-            File dir = new File(path);
-            if (!dir.exists() || dir.listFiles() == null) {
-                return null;
-            }
-            for (File file : dir.listFiles()) {
-                if (file.getName().endsWith(".nmon")) {
-                    com.ibm.nmon.NmonReportGenerator nrg = new com.ibm.nmon.NmonReportGenerator(
-                            file.getAbsolutePath());
-                    String host = nrg.getDataSets().iterator().next()
-                            .getHostname();
-                    File hostPath = new File(path + "/" + host);
-                    if (!hostPath.exists()) {
-                        hostPath.mkdir();
-                    }
-                    nrg.createCharts(hostPath.getAbsolutePath() + "/");
-                    avgData.putAll(nrg.getAverage());
-                }
-            }
-        } catch (Exception e) {
-            Logger.getLogger(PerformanceReportMap.class.getName()).log(Level.SEVERE, null, e);
-        }
+//        String path = build.getRootDir().getAbsolutePath() + "/performance-reports/monitoring";
+//        try {
+//            File dir = new File(path);
+//            if (!dir.exists() || dir.listFiles() == null) {
+//                return null;
+//            }
+//            for (File file : dir.listFiles()) {
+//                if (file.getName().endsWith(".nmon")) {
+//                    com.ibm.nmon.NmonReportGenerator nrg = new com.ibm.nmon.NmonReportGenerator(
+//                            file.getAbsolutePath());
+//                    String host = nrg.getDataSets().iterator().next()
+//                            .getHostname();
+//                    File hostPath = new File(path + "/" + host);
+//                    if (!hostPath.exists()) {
+//                        hostPath.mkdir();
+//                    }
+//                    nrg.createCharts(hostPath.getAbsolutePath() + "/");
+//                    avgData.putAll(nrg.getAverage());
+//                }
+//            }
+//        } catch (Exception e) {
+//            Logger.getLogger(PerformanceReportMap.class.getName()).log(Level.SEVERE, null, e);
+//        }
 
 //        ObjectMapper mapper = new ObjectMapper();
 //        mapper.writeValue(new File(path + "/resource_nmon.json"), avgData);
