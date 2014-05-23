@@ -1,0 +1,15 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <f:entry title="${%Report files}" field="glob">
+    <f:textbox />
+  </f:entry>
+  <j:choose>
+    <j:when test="${descriptor.getDisplayName().equals('JmeterSummarizer')}">   
+      <f:entry title="${%Summariser Date Format}"  field="logDateFormat">
+        <f:textbox/>
+      </f:entry>
+    </j:when>
+    <j:otherwise>
+    </j:otherwise>
+  </j:choose>
+  </j:jelly>

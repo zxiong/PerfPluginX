@@ -1,0 +1,200 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+         xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <l:layout xmlns:jm="/hudson/plugins/performance/tags" css="/plugin/performance/css/style.css">
+        <style type="text/css">
+            #TrendToggle {
+            display: none;
+            }
+            #ResourceToggle {
+            display: none;
+            }
+</style>
+
+        <script type="text/javascript">
+            function Toggle(ToggleTarget) {
+            var el = document.getElementById(ToggleTarget);
+            if (el.style.display == "block") {
+            el.style.display = "none";
+            }
+            else {
+            el.style.display = "block";
+            }   
+            }
+</script>        
+      
+        <st:include it="${it.build}" page="sidepanel.jelly" />
+        <l:main-panel>
+            <j:forEach var="performanceReport" items="${it.getPerformanceListOrdered()}">
+                <h2>${%Performance Breakdown by URI}: ${performanceReport.getReportFileName()}</h2>
+                <j:choose>
+                    <j:when test="${performanceReport.ifSummarizerParserUsed(performanceReport.getReportFileName())}">
+                        <img class="trend" src="./summarizerGraph?width=600&amp;height=325&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="325" />
+                    </j:when>
+                    <j:otherwise>
+                        <img class="trend" src="./respondingTimeGraph?width=600&amp;height=225&amp;performanceReportPosition=${performanceReport.getReportFileName()}" width="600" height="225" />
+                    </j:otherwise>
+                </j:choose>
+                <a href="./trendReport?performanceReportPosition=${performanceReport.getReportFileName()}">${% Response time trends for build: }"${it.build}" </a>
+        
+                <p>
+                    <h2>Result Comparison Between Builds</h2>
+                </p>
+                <f:form method="post" action="buildComparison" name="Build Comparison">
+                    <select class="setting-input" name="buildid" field="buildid">
+                        <j:forEach var="abuildId" items="${it.getBuildList()}">
+                            <f:option value="${abuildId}" selected="true">${abuildId}</f:option>
+                        </j:forEach>
+                    </select>
+                    <f:entry title="">
+                        <input type="submit" name="Submit'" value="${%BuildComparison}" class="submit-button" /> 
+                    </f:entry>
+                </f:form>         
+        
+                <table class="sortable source" border="1">
+                    <jm:captionLine it="${performanceReport}"/>
+                    <j:forEach var="uriReport" items="${performanceReport.getUriListOrdered()}">
+                        <tr class="${h.ifThenElse(uriReport.failed,'red','')}">
+                            <td class="left">
+                                <a href="./uriReport/${uriReport.encodeUriReport()}">
+                                    <st:out value="${uriReport.getShortUri()}" />
+                                </a>
+                            </td>
+                            <j:choose>
+                                <j:when test="${performanceReport.ifSummarizerParserUsed(performanceReport.getReportFileName())}">
+                                    <jm:summaryTableSummarizer it="${uriReport}" />
+                                </j:when>
+                                <j:otherwise>
+                                    <jm:summaryTable it="${uriReport}" />
+                                </j:otherwise>
+                            </j:choose>
+                        </tr>
+                    </j:forEach>
+                    <j:choose>
+                        <j:when test="${performanceReport.ifSummarizerParserUsed(performanceReport.getReportFileName())}">
+                        </j:when>
+                        <j:otherwise>
+                            <tr class="bold">
+                                <td class="left bold">${%All URIs}</td>
+                                <jm:summaryTable it="${performanceReport}" />
+                            </tr>
+                        </j:otherwise>
+                    </j:choose>
+                </table>
+            </j:forEach> 
+
+            <p>
+                <h2>System Resource Average Used%</h2>
+            </p>
+            <j:choose>
+                <j:when test="${it.ifOtherMonitor()}">
+                    <table class="sortable source" border="1">
+                        <tr>
+                            <th>Host</th>
+                            <j:forEach var="type" items="${it.getCactiMonitoredTypes()}">        
+                                <th>${type}</th>
+                            </j:forEach> 
+                        </tr>
+                        <j:forEach var="datarow" items="${it.getCactiMonitoredDatas().entrySet()}"> 
+                            <tr class="bold">
+                                <td class="left">
+                                    ${datarow.getKey()}
+                                </td>  
+                                <j:forEach var="type" items="${it.getCactiMonitoredTypes()}"> 
+                                    <td class="left">
+                                        ${datarow.getValue().get(type)}
+                                    </td>    
+                                </j:forEach>                                   
+                            </tr>           
+                        </j:forEach>
+                    </table>
+                    
+                    <p>
+                        <h2>System Resource Graph</h2>
+                    </p>
+        
+                    <p>
+                        <a href="javascript:Toggle('ResourceToggle');">Click expand system resource graph...</a>
+                    </p>
+                    <div id='ResourceToggle'>
+                        <j:forEach var="host" items="${it.getMonitoredHosts()}">
+                            <h2>${host} System Resource</h2>
+                            <img class="trend" src="./cpuUtilizationGraph?width=600&amp;height=325&amp;hostname=${host}" width="600" height="325" />
+                            <br></br>
+                            <img class="trend" src="./runQueueGraph?width=600&amp;height=325&amp;hostname=${host}" width="600" height="325" />
+                            <br></br>
+                            <img class="trend" src="./memoryGraph?width=600&amp;height=325&amp;hostname=${host}" width="600" height="325" />
+                            <br></br>
+                            <img class="trend" src="./pagingAmountGraph?width=600&amp;height=325&amp;hostname=${host}" width="600" height="325" />
+                            <br></br>
+                            <img class="trend" src="./diskBusyGraph?width=600&amp;height=325&amp;hostname=${host}" width="600" height="325" />
+                            <br></br>
+                            <img class="trend" src="./networkReadsGraph?width=600&amp;height=325&amp;hostname=${host}" width="600" height="325" />
+                        </j:forEach>
+                    </div>                    
+                
+                </j:when>
+            
+                <j:when test="${it.ifNmonMonitor()}">
+        
+                    <table class="sortable source" border="1">
+                        <tr>
+                            <th>Server</th>
+                            <th>CPU Used%</th>
+                            <th>CPU Load</th>
+                            <th>Memory Used%</th>
+                            <th>Disk Busy%</th>
+                            <th>NetWork Throughput(KB/s)</th>
+                        </tr>
+                        <j:forEach var="host" items="${it.getMonitoredHosts()}">
+                            <tr class="bold">
+                                <td class="left">
+                                    ${host}
+                                </td>
+                                <td class="right">
+                                    ${it.getAverageData(host,'CPU Total')}
+                                </td>
+                                <td class="right">
+                                    ${it.getAverageData(host,'Processes')}
+                                </td>
+                                <td class="right">
+                                    ${it.getAverageData(host,'Memory MB')}
+                                </td>
+                                <td class="right">
+                                    ${it.getAverageData(host,'Disk %Busy')}
+                                </td>
+                                <td class="right">
+                                    ${it.getAverageData(host,'Network I/O')}
+                                </td>                                        
+                            </tr>           
+                        </j:forEach>
+                    </table>
+        
+                    <p>
+                        <h2>System Resource Graph</h2>
+                    </p>
+        
+                    <p>
+                        <a href="javascript:Toggle('ResourceToggle');">Click expand system resource graph...</a>
+                    </p>
+                    <div id='ResourceToggle'>
+                        <j:forEach var="host" items="${it.getMonitoredHosts()}">
+                            <h2>${host} System Resource</h2>
+                            <img class="trend" src="./cpuUtilizationGraph?width=600&amp;height=325&amp;hostname=${host}" width="600" height="325" />
+                            <br></br>
+                            <img class="trend" src="./runQueueGraph?width=600&amp;height=325&amp;hostname=${host}" width="600" height="325" />
+                            <br></br>
+                            <img class="trend" src="./memoryGraph?width=600&amp;height=325&amp;hostname=${host}" width="600" height="325" />
+                            <br></br>
+                            <img class="trend" src="./pagingAmountGraph?width=600&amp;height=325&amp;hostname=${host}" width="600" height="325" />
+                            <br></br>
+                            <img class="trend" src="./diskBusyGraph?width=600&amp;height=325&amp;hostname=${host}" width="600" height="325" />
+                            <br></br>
+                            <img class="trend" src="./networkReadsGraph?width=600&amp;height=325&amp;hostname=${host}" width="600" height="325" />
+                        </j:forEach>
+                    </div>
+                </j:when>    
+            </j:choose>             
+      
+        </l:main-panel>
+    </l:layout>
+</j:jelly>

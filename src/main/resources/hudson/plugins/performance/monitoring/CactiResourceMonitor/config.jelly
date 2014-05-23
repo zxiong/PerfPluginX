@@ -1,0 +1,15 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <f:entry title="Cacti URL" field="cactiUrl">
+    <f:textbox />
+  </f:entry>
+  <f:entry title="username" field="username">
+    <f:textbox />
+  </f:entry>
+  <f:entry title="password">
+    <f:password field="password" />
+  </f:entry>
+  <f:entry title="Monitored Hosts" field="hosts" description="All monitored hosts, delimiter using comma">
+      <f:textbox />
+  </f:entry>
+  </j:jelly>

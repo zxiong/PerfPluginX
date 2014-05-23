@@ -1,0 +1,71 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">	
+  <l:layout xmlns:jm="/hudson/plugins/performance/tags"  css="/plugin/performance/css/style.css">
+    <l:main-panel>
+        <p>
+            <h1>Comparison Result Between Build ${it.getCurrentBuildId()} and ${it.getTargetBuildId()}</h1>
+        </p>
+        <p>
+            <h2>Comparison Report for AVG. Response Time</h2>
+        </p>
+      <j:forEach var="filename" items="${it.getReportFiles()}">
+          <p>
+              <h3>Result File Name: ${filename}</h3>
+          </p>
+        <table class="sortable source" border="1">
+            <tr>
+                <th>Page Name</th>
+                <th>Avg. Elapsed Time(ms) on Build <br></br> ${it.getTargetBuildId()}</th>                
+                <th>Avg. Elapsed Time(ms) on Build <br></br> ${it.getCurrentBuildId()} </th>
+                <th>Improvement value(ms)</th>
+                <th>Improvement Rate</th>
+            </tr>
+            <tr class="bold">
+            <j:forEach var="datarows" items="${it.getReportDatas(filename)}">
+                <tr class="${h.ifThenElse(0.0>datarows.get(3),'red','')}">
+                <j:forEach var="data" items="${datarows}">
+                    <td class="right">
+                        ${data}
+                    </td>   
+                </j:forEach> 
+                </tr>                                               
+            </j:forEach>
+            </tr> 
+         </table>
+         <br></br>
+         <img class="trend" src="./comparisonGraph?reportname=${filename}"/>
+      </j:forEach>
+      
+      <p>
+          <h2>Comparison Report for System Resource</h2>
+      </p>
+      <j:forEach var="host" items="${it.getServers()}">
+          <p>
+              <h3>Server: ${host}</h3>
+          </p>
+        <table class="sortable source" border="1">
+            <tr>
+                <th>Metric Type</th>
+                <th>Avg. on Build <br></br>${it.getTargetBuildId()}</th>
+                <th>Avg. on Build <br></br>${it.getCurrentBuildId()}</th>
+                <th>Improvement Value</th>
+                <th>Improvement Rate</th>
+            </tr>
+            <tr class="bold">
+            <j:forEach var="datarows" items="${it.getResourceData(host)}">
+                <tr class="${h.ifThenElse((0.0>datarows.get(3)),'red','')}">
+                <j:forEach var="data" items="${datarows}">
+                    <td class="right">
+                        ${data}
+                    </td>   
+                </j:forEach> 
+                </tr>                                               
+            </j:forEach>
+            </tr> 
+         </table>
+         <br></br>
+         <img class="trend" src="./resourceComprisonGraph?width=600&amp;height=350&amp;host=${host}" width="600" height="350" />               
+      </j:forEach>    
+    </l:main-panel>
+  </l:layout>
+</j:jelly>
